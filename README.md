@@ -1,25 +1,31 @@
 # Haldane-KIS
 
-This repository contains data and code for the paper *Representing inhibition in growth kinetics: the Haldane KIS*, available both on MATLAB and PYTHON.
+This repository contains the data and code for the paper *Representing inhibition in growth kinetics: the Haldane KIS*, available in both MATLAB and PYTHON.
 
 ## Data
 
-Data is extracted from [1] and [2] for eight microalgae species, each contains two columns, one for light irradiance and one for growth rate.
+The data is extracted from [1] and [2] for eight microalgae species. Each dataset contains two columns: one for light irradiance and one for growth rate. The datafile are named as follow:
+* Anning_PcHL = *Skeletonema costatum*,
+* Yang1 = *Isochrysis galbana*,
+* Yang2 = *Dunaliella salina*,
+* Yang3 = *Platymonus subcordiformis*,
+* Yang4 = *Chlorococcum sp. FACHB-1556*,
+* Yang5 = *Microcystis aeruginosa FACHB-905*,
+* Yang6 = *Microcystis wesenbergii FACHB-1112*,
+* Yang7 = *Scenedesmus obliquus FACHB-116*.
 
-Skeletonema costatum
-Isochrysis galbana
-Dunaliella salina
-Platymonus subcordiformis
-Chlorococcum sp. FACHB-1556
-Microcystis aeruginosa FACHB-905
-Microcystis wesenbergii FACHB-1112
-Scenedesmus obliquus FACHB-116
+## Descriptions
+
+Five descriptions of the Haldane model are considered: four existing in the literature and one newly proposed in the paper.
 
 ## MATLAB version
 
-One 'main.m' script contains several sub-functions. The name of data needs to be 
+A single `main.m` script contains all necessary sub-functions to compute results and generate figures. To run the script `main.m`, the `data` folder also needs to be downloaded, and the data name needs to be specified on the second line of the script, e.g., `dataName='Yang1'`. The script will then generate all the results presented in the paper for the five descriptions.
 
-* five functions for five descriptions
+## PYTHON version
+
+
+
 
 ## References
 
