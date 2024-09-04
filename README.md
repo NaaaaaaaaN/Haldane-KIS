@@ -6,6 +6,15 @@ This repository contains data and code for the paper *Representing inhibition in
 
 Data is extracted from [1] and [2] for eight microalgae species, each contains two columns, one for light irradiance and one for growth rate.
 
+Skeletonema costatum
+Isochrysis galbana
+Dunaliella salina
+Platymonus subcordiformis
+Chlorococcum sp. FACHB-1556
+Microcystis aeruginosa FACHB-905
+Microcystis wesenbergii FACHB-1112
+Scenedesmus obliquus FACHB-116
+
 ## MATLAB version
 
 One 'main.m' script contains several sub-functions. The name of data needs to be 
