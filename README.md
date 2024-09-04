@@ -20,11 +20,10 @@ Five descriptions of the Haldane model are considered: four existing in the lite
 
 ## MATLAB version
 
-A single `main.m` script contains all necessary sub-functions to compute results and generate figures. To run the script `main.m`, the `data` folder also needs to be downloaded, and the data name needs to be specified on the second line of the script, e.g., `dataName='Anning_PcHL'`. The script will then generate all the results presented in the paper for the five descriptions.
+A single `main.m` script contains all necessary sub-functions to compute results and generate figures. To run the script `main.m`, the `data` folder also needs to be downloaded, and the data name needs to be specified on the second line of the script, e.g., `dataName='Anning_PcHL'`. The optimization toolbox is also required to run the script, as the `fminsearch` function is used. The script provides all necessary results presented in the paper for the five descriptions. It also generates and saves all figures illustrated in the Appendix.
 
 ## PYTHON version
 
-In the article, the optimal parameters for each description are computed using MATLAB’s `fminsearch` function. Unfortunately, there is no direct equivalent of `fminsearch` function available in Python. As a result, the 
 PYTHON version uses the `minimize` function from the `scipy` package to find the optimal parameters. The results obtained are virtually identical to those computed by MATLAB.
 
 ### Dependencies
