@@ -20,11 +20,37 @@ Five descriptions of the Haldane model are considered: four existing in the lite
 
 ## MATLAB version
 
-A single `main.m` script contains all necessary sub-functions to compute results and generate figures. To run the script `main.m`, the `data` folder also needs to be downloaded, and the data name needs to be specified on the second line of the script, e.g., `dataName='Yang1'`. The script will then generate all the results presented in the paper for the five descriptions.
+A single `main.m` script contains all necessary sub-functions to compute results and generate figures. To run the script `main.m`, the `data` folder also needs to be downloaded, and the data name needs to be specified on the second line of the script, e.g., `dataName='Anning_PcHL'`. The script will then generate all the results presented in the paper for the five descriptions.
 
 ## PYTHON version
 
+In the article, the optimal parameters for each description are computed using MATLAB’s `fminsearch` function. Unfortunately, there is no direct equivalent of `fminsearch` function available in Python. As a result, the 
+PYTHON version uses the `minimize` function from the `scipy` package to find the optimal parameters. The results obtained are virtually identical to those computed by MATLAB.
 
+### Dependencies
+
+The Python script requires Python 3.12+ and the following dependencies:
+* `numpy` : version 2.1,
+* `scipy` : version 1.14,
+* `matplotlib` : version 3.9.
+
+All dependencies can be installed via Conda or PIP:
+
+```javascript copy
+conda install numpy scipy matplotlib
+```
+or 
+```javascript copy
+pip install numpy scipy matplotlib
+```
+
+### Executing Python script
+
+Once all dependencies are satisfied, make sure to download the `data` folder. Then, one can run the script with the following command:
+```javascript copy
+python KIS.py
+```
+Next, follow the prompts to enter the data file name and the description name. The results presented in the paper will then be displayed.
 
 
 ## References
