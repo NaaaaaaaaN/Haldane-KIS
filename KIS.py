@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 
 
+
 folder_path = './data'
 file_names = os.listdir(folder_path)
 file_names = [i.split('.')[0] for i in file_names]
