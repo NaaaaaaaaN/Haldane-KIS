@@ -6,24 +6,22 @@ from scipy.linalg import inv
 import matplotlib.pyplot as plt
 
 
-
-
 folder_path = './data'
 file_names = os.listdir(folder_path)
 file_names = [i.split('.')[0] for i in file_names]
+file_names.sort()
 
 descriptions = ['mu1', 'mu2', 'mu3', 'mu4','mu5']
-paraname = [['mumax', 'alpha', 'xopt'],['mubar', 'Kx', 'Ki'],['a', 'b', 'c'],['mubar', 'Kx', 'Ki'],['gammamax', 'xstar']]
+paraname = [['muhat', 'Kx', 'Ki'],['mum', 'Kx', 'Ki'],['a', 'b', 'c'],['mumax', 'alpha', 'xopt'],['gammamax', 'xstar']]
 algae = ["Skeletonema costatum", "Isochrysis galbana", "Dunaliella salina}", "Platymonus subcordiformis}", "Chlorococcum sp. FACHB-1556", "Microcystis aeruginosa FACHB-905", "Microcystis wesenbergii FACHB-1112", "Scenedesmus obliquus FACHB-116"]
 
 
-
 def mu1(para, x):
-    y1 = para[0] * x / (x + para[0]/para[1] * (x/para[2] - 1)**2)
+    y1 = para[0] * x / (x + para[1] + x**2/para[2])
     return y1
 
 def mu2(para, x):
-    y1 = para[0] * x / (x + para[1] + x**2/para[2])
+    y1 = para[0] * para[2] * x / ((x + para[1]) * (x + para[2]))
     return y1
 
 def mu3(para, x):
@@ -31,7 +29,7 @@ def mu3(para, x):
     return y1
 
 def mu4(para, x):
-    y1 = para[0] * para[2] * x / ((x + para[1]) * (x + para[2]))
+    y1 = para[0] * x / (x + para[0]/para[1] * (x/para[2] - 1)**2)
     return y1
 
 def mu5(para, x):
@@ -45,25 +43,25 @@ def SSE(para, mu, data):
     return SSE
 
 def dmu1(optpara, x):
-#  definition of the partial derivative of mu_1 w.r.t. each parameters.
-    mumax = optpara[0]
-    al = optpara[1]
-    xopt = optpara[2]
-    dmumax = al**2 * xopt**4 * x**2 / (mumax * (xopt-x)**2 + al * xopt**2 * x)**2
-    dal = (mumax*xopt)**2 * x * (xopt-x)**2 / ( mumax * (xopt-x)**2 + al * xopt**2 * x)**2
-    dxopt = -2 * mumax**2 * al * xopt * x**2 * (xopt-x) / ( mumax * (xopt-x)**2 + al * xopt**2 * x)**2
-    y = np.vstack([dmumax, dal, dxopt]).T
+# definition of the partial derivative of mu_1 w.r.t. each parameters.
+    muhat = optpara[0]
+    Kx = optpara[1]
+    Ki = optpara[2]
+    dmuhat = x / (x + Kx + x**2/Ki )
+    dKx = -muhat * x / (x + Kx + x**2/Ki)**2
+    dKi = muhat * x**3 / (Ki * x + Ki * Kx + x**2 )**2
+    y = np.vstack([dmuhat, dKx, dKi]).T
     return y
 
 def dmu2(optpara, x):
 # definition of the partial derivative of mu_2 w.r.t. each parameters.
-    mubar = optpara[0]
+    mum = optpara[0]
     Kx = optpara[1]
     Ki = optpara[2]
-    dmubar = x / (x + Kx + x**2/Ki )
-    dKx = -mubar * x / (x + Kx + x**2/Ki)**2
-    dKi = mubar * x**3 / (Ki * x + Ki * Kx + x**2 )**2
-    y = np.vstack([dmubar, dKx, dKi]).T
+    dmum = Ki * x / (x+Kx) / (x+Ki)
+    dKx = -mum * Ki * x / (x+Kx)**2 / (x+Ki)
+    dKi = mum * x**2 / (x+Kx) / (x+Ki)**2
+    y = np.vstack([dmum, dKx, dKi]).T
     return y
 
 def dmu3(optpara, x):
@@ -78,14 +76,14 @@ def dmu3(optpara, x):
     return y
 
 def dmu4(optpara, x):
-# definition of the partial derivative of mu_4 w.r.t. each parameters.
-    mubar = optpara[0]
-    Kx = optpara[1]
-    Ki = optpara[2]
-    dmubar = Ki * x / (x+Kx) / (x+Ki)
-    dKx = -mubar * Ki * x / (x+Kx)**2 / (x+Ki)
-    dKi = mubar * x**2 / (x+Kx) / (x+Ki)**2
-    y = np.vstack([dmubar, dKx, dKi]).T
+#  definition of the partial derivative of mu_4 w.r.t. each parameters.
+    mumax = optpara[0]
+    al = optpara[1]
+    xopt = optpara[2]
+    dmumax = al**2 * xopt**4 * x**2 / (mumax * (xopt-x)**2 + al * xopt**2 * x)**2
+    dal = (mumax*xopt)**2 * x * (xopt-x)**2 / ( mumax * (xopt-x)**2 + al * xopt**2 * x)**2
+    dxopt = -2 * mumax**2 * al * xopt * x**2 * (xopt-x) / ( mumax * (xopt-x)**2 + al * xopt**2 * x)**2
+    y = np.vstack([dmumax, dal, dxopt]).T
     return y
 
 def dmu5(optpara, x):
@@ -102,6 +100,7 @@ def dmu5(optpara, x):
 def computeSensitivity(data, mu, dmu, opt_result, z):
     optpara = opt_result.x
     Q = np.diag(np.array([max(max(data[1])/50, 0.1*i)**(-2) for i in data[1]]))
+    status = 'ok'
     if mu in globals() and dmu in globals():
         FIM = globals()[dmu](optpara, data[0]).T @ Q @ globals()[dmu](optpara, data[0])
         d_FIM = np.linalg.det(FIM)
@@ -117,8 +116,8 @@ def computeSensitivity(data, mu, dmu, opt_result, z):
             e = np.nan
             sgm = np.nan
             R = np.nan
-            print('Fisher information matrix is close to singular.')
-    return e, sgm, R
+            status = 'singular'
+    return e, sgm, R, status
 
 def computeAICc(opt_result, data):
     SSE = opt_result.fun
@@ -142,32 +141,35 @@ def computePEMAC(opt_result, e, data):
     return PEMAC
 
 def plot_optimal_experiment(data, mu, dmu, optpara, z):
-    h = 24 * 3600
-    e, sigma, corr = computeSensitivity(data, mu, dmu, optpara, z)
-    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-    plt.plot(data[0], data[1] * h, '+', label='Measurement', markersize=10)
-    if len(data[0]) == 12 :
-        t = 2.201
-    elif len(data[0]) == 13 :
-        t = 2.179
-    elif len(data[0]) == 22 :
-        t = 2.080
-    if mu in globals() and dmu in globals():
-        plt.plot(z, globals()[mu](optpara.x, z) * h, '-', label='Estimation', linewidth=2)
-        plt.plot(z, (globals()[mu](optpara.x, z) - t * e) * h, '--', label='Lower Bound', linewidth=2)
-        plt.plot(z, (globals()[mu](optpara.x, z) + t * e) * h, '--', label='Upper Bound', linewidth=2)
-    ax.legend()
-    plt.show()
+    h = 3600
+    e, sigma, corr, status = computeSensitivity(data, mu, dmu, optpara, z)
+    if status != 'singular':
+        fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+        plt.plot(data[0], data[1] * h, '+', label='Measurement', markersize=10)
+        if len(data[0]) == 12 :
+            t = 2.201
+        elif len(data[0]) == 13 :
+            t = 2.179
+        elif len(data[0]) == 22 :
+            t = 2.080
+        if mu in globals() and dmu in globals():
+            plt.plot(z, globals()[mu](optpara.x, z) * h, '-', label='Estimation', linewidth=2)
+            plt.plot(z, (globals()[mu](optpara.x, z) - t * e) * h, '--', label='Lower Bound', linewidth=2)
+            plt.plot(z, (globals()[mu](optpara.x, z) + t * e) * h, '--', label='Upper Bound', linewidth=2)
+        ax.legend()
+        plt.show()
 
 def plot_sensitivity(data, mu, dmu, optpara, z, paraname):
-    e, sigma, corr = computeSensitivity(data, mu, dmu, optpara, z)
-    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-    if dmu in globals():
-        for i in range(len(sigma)) :
-            plt.plot(z, (sigma[i] / e * globals()[dmu](optpara.x, z)[:, i])**2, '-', label=f'{paraname[desp][i]}', linewidth=2)
-    ax.legend()
-    ax.set_ylim([0, 1])
-    plt.show()
+    e, sigma, corr, status = computeSensitivity(data, mu, dmu, optpara, z)
+    if status != 'singular':
+        fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+        if dmu in globals():
+            for i in range(len(sigma)) :
+                plt.plot(z, (sigma[i] / e * globals()[dmu](optpara.x, z)[:, i])**2, '-', label=f'{paraname[desp][i]}', linewidth=2)
+        ax.legend()
+        ax.set_xlim([0, 1600])
+        ax.set_ylim([-0.05, 1.05])
+        plt.show()
 
 xt = np.array(range(-2,1600))
 
@@ -188,7 +190,7 @@ if response in file_names:
     if response in descriptions:
         description = response
 
-        with open(f'./Data/{data_file}.txt', 'r') as file:
+        with open(f'{folder_path}/{data_file}.txt', 'r') as file:
             content = file.read()
         lines = content.split('\n')
         lines = [i for i in lines if i !='']
@@ -219,13 +221,6 @@ if response in file_names:
 
             if desp < 5 :
                 if desp == 1:
-                    if data_file[0] == 'A' or data_file[-1] == '1':
-                        x0 = [0, 0, 100]
-                    elif data_file[-1] in ['6', '7']:
-                        x0 = [0, 0, 10]
-                    else:
-                        x0 = [0, 0, 100]
-                elif desp == 2:
                     if data_file[0] == 'A' or data_file[-1] in ['2', '3', '4']:
                         x0 = [0, 1, 1]
                     elif data_file[-1] == '1':
@@ -236,6 +231,8 @@ if response in file_names:
                         x0 = [1, 2, 0]
                     elif data_file[-1] == '7':
                         x0 = [0, 10, 1]
+                elif desp == 2 :
+                    x0 = [0, 10, 10]
                 elif desp == 3:
                     if data_file[0] == 'A':
                         x0 = [0, 0, 100]
@@ -243,8 +240,13 @@ if response in file_names:
                         x0 = [0, 0, 0]
                     else:
                         x0 = [0, 0, 1]
-                elif desp == 4 :
-                    x0 = [0, 10, 10]
+                elif desp == 4:
+                    if data_file[0] == 'A' or data_file[-1] == '1':
+                        x0 = [0, 0, 100]
+                    elif data_file[-1] in ['2', '6', '7']:
+                        x0 = [0, 0, 10]
+                    else:
+                        x0 = [0, 0, 100]
                 optimal_result = minimize(SSE, x0, args=(mu, data), method='Nelder-Mead')
                 desp = desp - 1
                 print(f'Optimal parameters of description :\n')
@@ -263,10 +265,13 @@ if response in file_names:
                     f'{paraname[desp][1]:10}: {optimal_result.x[1]},\n')
                 print(f'SSE : {optimal_result.fun}\n')
                 
-            e_data, sigma, corr = computeSensitivity(data, mu, dmu, optimal_result, data[0])
+            e_data, sigma, corr, status = computeSensitivity(data, mu, dmu, optimal_result, data[0])
             AICc = computeAICc(optimal_result, data) 
             BIC = computeBIC(optimal_result, data)
             PEMAC = computePEMAC(optimal_result, e_data, data)
+
+            if status == 'singular':
+                print('Fisher information matrix is close to singular.')
 
             print(f'Correlation matrix of parameter estimation error of description:\n{corr}\n')
             print(f'AICc : {AICc}\n')
@@ -278,3 +283,4 @@ if response in file_names:
 
 
           
+
