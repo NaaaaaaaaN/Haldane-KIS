@@ -12,14 +12,14 @@ runtest(dataName, @mu5, @dmu5, para5, option);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function y = mu1(para, x)
 % definition of the description mu_1 with
-% three parameters mu_max, alpha and x_opt.
+% three parameters \hat mu, K_x and K_i.
 % input:
 %	para : vector
 %	parameters in the description
 %	x : vector
 % 	measured irradiance
-mumax = para(1); al = para(2); xopt = para(3);
-y = mumax*x ./ ( x + mumax/al * (x./xopt - 1).^2 );
+muhat = para(1); Kx = para(2); Ki = para(3);
+y = muhat*x ./ ( x + Kx + x.^2/Ki );
 end
 function y = dmu1(para, x)
 % definition of the partial derivative of
@@ -29,26 +29,23 @@ function y = dmu1(para, x)
 %	parameters in the description
 %	x : vector
 % 	measured irradiance
-mumax = para(1); al = para(2); xopt = para(3);
-dmumax = al^2*xopt^4*x.^2 ./ ...
-    ( mumax*(xopt-x).^2 + al*xopt^2*x ).^2;
-dal = (mumax*xopt)^2*x .* (xopt-x).^2 ./ ...
-    ( mumax*(xopt-x).^2 + al*xopt^2*x ).^2;
-dxopt = -2*mumax^2*al*xopt*x.^2 .* (xopt-x) ./ ...
-    ( mumax*(xopt-x).^2 + al*xopt^2*x ).^2;
-y = [dmumax, dal, dxopt];
+muhat = para(1); Kx = para(2); Ki = para(3);
+dmubat = x ./ ( x + Kx + x.^2/Ki );
+dKx = -muhat*x ./ ( x + Kx + x.^2/Ki ).^2;
+dKi = muhat*x.^3 ./ ( Ki*x + Ki*Kx + x.^2 ).^2;
+y = [dmubat, dKx, dKi];
 end
 
 function y = mu2(para, x)
 % definition of the description mu_2 with
-% three parameters mu^bar, K_x and K_i.
+% three parameters mu_m, K_x and K_i.
 % input:
 %	para : vector
 %	parameters in the description
 %	x : vector
 % 	measured irradiance
-mubar = para(1); Kx = para(2); Ki = para(3);
-y = mubar*x ./ ( x + Kx + x.^2/Ki );
+mum = para(1); Kx = para(2); Ki = para(3);
+y = mum*Ki*x ./ (x+Kx) ./ (x+Ki);
 end
 function y = dmu2(para, x)
 % definition of the partial derivative of
@@ -58,11 +55,11 @@ function y = dmu2(para, x)
 %	parameters in the description
 %	x : vector
 % 	measured irradiance
-mubar = para(1); Kx = para(2); Ki = para(3);
-dmubar = x ./ ( x + Kx + x.^2/Ki );
-dKx = -mubar*x ./ ( x + Kx + x.^2/Ki ).^2;
-dKi = mubar*x.^3 ./ ( Ki*x + Ki*Kx + x.^2 ).^2;
-y = [dmubar, dKx, dKi];
+mum = para(1); Kx = para(2); Ki = para(3);
+dmum = Ki*x ./ (x+Kx) ./ (x+Ki);
+dKx = -mum*Ki*x ./ (x+Kx).^2 ./ (x+Ki);
+dKi = mum*x.^2 ./ (x+Kx) ./ (x+Ki).^2;
+y = [dmum, dKx, dKi];
 end
 
 function y = mu3(para, x)
@@ -93,14 +90,14 @@ end
 
 function y = mu4(para, x)
 % definition of the description mu_4 with
-% three parameters mu^bar, K_x and K_i.
+% three parameters mu_max, alpha and x_opt.
 % input:
 %	para : vector
 %	parameters in the description
 %	x : vector
 % 	measured irradiance
-mubar = para(1); Kx = para(2); Ki = para(3);
-y = mubar*Ki*x ./ (x+Kx) ./ (x+Ki);
+mumax = para(1); al = para(2); xopt = para(3);
+y = mumax*x ./ ( x + mumax/al * (x./xopt - 1).^2 );
 end
 function y = dmu4(para, x)
 % definition of the partial derivative of
@@ -110,11 +107,14 @@ function y = dmu4(para, x)
 %	parameters in the description
 %	x : vector
 % 	measured irradiance
-mubar = para(1); Kx = para(2); Ki = para(3);
-dmubar = Ki*x ./ (x+Kx) ./ (x+Ki);
-dKx = -mubar*Ki*x ./ (x+Kx).^2 ./ (x+Ki);
-dKi = mubar*x.^2 ./ (x+Kx) ./ (x+Ki).^2;
-y = [dmubar, dKx, dKi];
+mumax = para(1); al = para(2); xopt = para(3);
+dmumax = al^2*xopt^4*x.^2 ./ ...
+    ( mumax*(xopt-x).^2 + al*xopt^2*x ).^2;
+dal = (mumax*xopt)^2*x .* (xopt-x).^2 ./ ...
+    ( mumax*(xopt-x).^2 + al*xopt^2*x ).^2;
+dxopt = -2*mumax^2*al*xopt*x.^2 .* (xopt-x) ./ ...
+    ( mumax*(xopt-x).^2 + al*xopt^2*x ).^2;
+y = [dmumax, dal, dxopt];
 end
 
 function y = mu5(para, x)
@@ -232,7 +232,8 @@ function [e, sgm, R] = computeSensitivity(x, dmu, para, FIM, s, z)
 %	residual mean square
 %	z : vector
 %	variable in error propagation
-V = FIM^-1; sd = sqrt(diag(V)); R = V./(sd*sd');
+V = FIM^-1; sd = sqrt(diag(V)); 
+R = V./(sd*sd');
 sgm = s*sqrt( length(x)*diag(V) );
 e = sqrt(sum( dmu(para, z).^2.*(sgm.^2)', 2 ));
 end
@@ -317,16 +318,16 @@ xlabel('$x$ ($$\mu$$mol photons m$$^{-2} $$s$$^{-1}$$)', ...
     'interpreter', 'latex'); xlim([0 1600]); ylim([0 1]);
 % set legend for different descriptions
 if strcmp(funcInfo.function, 'mu1')
-    legend({'$$ \mu_{\max}$$', '$$ \alpha$$', '$$ x_{opt}$$'}, ...
+    legend({'$$ \hat{\mu}$$', '$$ K_x$$', '$$ K_i$$'}, ...
         'Location', 'southeast', 'interpreter', 'latex');
 elseif strcmp(funcInfo.function, 'mu2')
-    legend({'$$ \bar{\mu}$$', '$$ K_x$$', '$$ K_i$$'}, ...
+    legend({'$$ \mu_m$$', '$$ K_x$$', '$$ K_i$$'}, ...
         'Location', 'southeast', 'interpreter', 'latex');
 elseif strcmp(funcInfo.function, 'mu3')
     legend({'$$ a$$', '$$ b$$', '$$ c$$'}, ...
        'Location', 'southeast', 'interpreter', 'latex');
 elseif strcmp(funcInfo.function, 'mu4')
-    legend({'$$ \bar{\mu}$$', '$$ K_x$$', '$$ K_i$$'}, ...
+    legend({'$$ \mu_{\max}$$', '$$ \alpha$$', '$$ x_{opt}$$'}, ...
         'Location', 'southeast', 'interpreter', 'latex');
 elseif strcmp(funcInfo.function, 'mu5')
     legend({'$$ \gamma_{\max}$$', '$$ x^{\star}$$'}, ...
@@ -371,14 +372,14 @@ function [option, para1, para2, para3, para4, para5] = OptSetting(varname)
 option = optimset('TolFun', 1e-12, 'TolX', 1e-12, ...
     'MaxFunEvals', 1e10, 'MaxIter', 1e8);
 if strcmp(varname, 'Yang5') %data Yang5
-    para1 = [1, 1, 1]; para2 = [-10, -10, -1]; 
-    para3 = [0, -1, 1000]; para4 = [100, 10, 10];
+    para1 = [-10, -10, -1]; para2 = [100, 10, 10];
+    para3 = [0, -1, 1000]; para4 = [1, 1, 1];
 elseif strcmp(varname, 'Anning_PcHL') %data Anning_PcHL
-    para1 = [0, 0, 100]; para2 = [0, 1, 1]; 
-    para3 = [0, 0, 1]; para4 = [1, 1, 1];
+    para1 = [0, 1, 1]; para2 = [1, 1, 1]; 
+    para3 = [0, 0, 1]; para4 = [0, 0, 100];
 else %data Yang1-4, Yang6-7
-    para1 = [0, 1, 1]; para2 = [0, 1, 1]; 
-    para3 = [0, 0, 0]; para4 = [1, 1, 1];
+    para1 = [0, 1, 1]; para2 = [1, 1, 1];
+    para3 = [0, 0, 0]; para4 = [0, 1, 1];
 end
 para5 = [0, 2];
 end
@@ -404,7 +405,7 @@ disp('Optimal parameter values :')
 fprintf(1, '%.10e\n', ParaOpt); fprintf(1, 'SSE = %.4e\n', SSE);
 [FIM, s] = computeFIM(x, y, mu, dmu, ParaOpt);
 disp('The correlation matrix is')
-if strcmp(funcInfo.function, 'mu4') && abs(det(FIM)) < 1e-12
+if strcmp(funcInfo.function, 'mu2') && abs(det(FIM)) < 1e-12
     PEMAC = NaN;
     fprintf(2, 'Fisher information matrix is singular !!\n');
 else
