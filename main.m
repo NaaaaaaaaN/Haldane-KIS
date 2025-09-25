@@ -1,5 +1,5 @@
 clc; clear; close all; format compact;
-dataName = 'Yang7'; 
+dataName = 'Yang4'; 
 [option, para1, para2, para3, para4, para5] = OptSetting(dataName);
 runtest(dataName, @mu1, @dmu1, para1, option);
 runtest(dataName, @mu2, @dmu2, para2, option);
@@ -273,18 +273,19 @@ figure
 plot(x, y*sh, '+', xt,  mu(para, xt)*sh, '-', ...
     xt, ( mu(para, xt) - sgflvl*e' )*sh, '--', ...
     xt, ( mu(para, xt) + sgflvl*e' )*sh, '--', ...
-    'LineWidth',2, 'MarkerSize', 10);
+    'LineWidth',2.5, 'MarkerSize', 10);
 xlabel('$x$ ($$\mu$$mol photons m$$^{-2} $$s$$^{-1}$$)', ...
-    'interpreter', 'latex'); xlim([-2 1600]);
+    'interpreter', 'latex', 'FontSize', 20); xlim([-2 1600]);
 % set ylabel for different data
 if strcmp(varname, 'Anning_PcHL')
-    ylabel('P$^C$ (h$$^{-1}$$)', 'interpreter', 'latex');
+    ylabel('P$^C$ (h$$^{-1}$$)', 'interpreter', 'latex', 'FontSize', 20);
 else %data Yang
     ylabel('P$_n$ ($$\mu$$mol O$_2$ mg$$^{-1} $$Chla h$$^{-1}$$)', ...
-    'interpreter', 'latex');
+    'interpreter', 'latex', 'FontSize', 20);
 end
-legend('Mesurement', 'Estimation', 'Location', 'SouthEast');
-set(gca, 'linewidth', 2); set(gca, 'FontSize', 20);
+set(gca, 'FontSize', 20);
+legend('Mesurement', 'Estimation', 'Location', 'SouthEast', 'FontSize', 25);
+set(gca, 'linewidth', 2); 
 % save figure
 figname = strcat('PI_', varname, '_', funcInfo.function, '.png');
 if isfile(['fig/' figname]) == 0
@@ -313,27 +314,28 @@ xt = 1:1:1600; %grid for illustration
 v = dmu(para, xt');
 figure
 plot(xt, (sgm'.*v./e).^2, ...
-    'LineWidth',2, 'MarkerSize', 10);
+    'LineWidth',2.5, 'MarkerSize', 10);
 xlabel('$x$ ($$\mu$$mol photons m$$^{-2} $$s$$^{-1}$$)', ...
-    'interpreter', 'latex'); xlim([0 1600]); ylim([0 1]);
+    'interpreter', 'latex', 'FontSize', 20); xlim([0 1600]); ylim([0 1]);
+set(gca, 'FontSize', 20);
 % set legend for different descriptions
 if strcmp(funcInfo.function, 'mu1')
     legend({'$$ \hat{\mu}$$', '$$ K_x$$', '$$ K_i$$'}, ...
-        'Location', 'southeast', 'interpreter', 'latex');
+        'Location', 'southeast', 'interpreter', 'latex', 'FontSize', 25);
 elseif strcmp(funcInfo.function, 'mu2')
     legend({'$$ \mu_m$$', '$$ K_x$$', '$$ K_i$$'}, ...
-        'Location', 'southeast', 'interpreter', 'latex');
+        'Location', 'southeast', 'interpreter', 'latex', 'FontSize', 25);
 elseif strcmp(funcInfo.function, 'mu3')
     legend({'$$ a$$', '$$ b$$', '$$ c$$'}, ...
-       'Location', 'southeast', 'interpreter', 'latex');
+       'Location', 'southeast', 'interpreter', 'latex', 'FontSize', 25);
 elseif strcmp(funcInfo.function, 'mu4')
     legend({'$$ \mu_{\max}$$', '$$ \alpha$$', '$$ x_{opt}$$'}, ...
-        'Location', 'southeast', 'interpreter', 'latex');
+        'Location', 'southeast', 'interpreter', 'latex', 'FontSize', 25);
 elseif strcmp(funcInfo.function, 'mu5')
     legend({'$$ \gamma_{\max}$$', '$$ x^{\star}$$'}, ...
-        'Location', 'southeast', 'interpreter', 'latex');
+        'Location', 'southeast', 'interpreter', 'latex', 'FontSize', 25);
 end
-set(gca, 'linewidth', 2); set(gca, 'FontSize', 20);
+set(gca, 'linewidth', 2);
 % save figure
 figname = strcat('Sensitivity_', varname, '_', funcInfo.function, '.png');
 if isfile(['fig/' figname]) == 0
