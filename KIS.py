@@ -109,9 +109,9 @@ def computeSensitivity(data, mu, dmu, opt_result, z):
             sd = np.sqrt(np.diagonal(V))
             sd = sd.reshape((len(optpara),1))
             R = V / (sd * sd.T)
-            s = np.sqrt( ((globals()[mu](optpara, data[0])-data[1]).T @ Q @(globals()[mu](optpara, data[0])-data[1]) ) / ( len(data[0])-len(optpara) ) )
-            sgm = s * np.sqrt( len(data[0]) * np.diagonal(V) )
-            e = np.sqrt(np.sum(globals()[dmu](optpara, z)**2 * (sgm**2).T, axis=1 ))
+            s = np.sqrt(((globals()[mu](optpara, data[0])-data[1]).T @ Q @(globals()[mu](optpara, data[0])-data[1]) ) / ( len(data[0])-len(optpara)))
+            sgm = s * np.sqrt(len(data[0]) * np.diagonal(V))
+            e = np.sqrt(np.sum(globals()[dmu](optpara, z)**2 * (sgm**2).T, axis=1))
         else:
             e = np.nan
             sgm = np.nan
@@ -243,7 +243,7 @@ if response in file_names:
                 elif desp == 4:
                     if data_file[0] == 'A' or data_file[-1] == '1':
                         x0 = [0, 0, 100]
-                    elif data_file[-1] in ['2', '6', '7']:
+                    elif data_file[-1] in ['2', '4', '6', '7']:
                         x0 = [0, 0, 10]
                     else:
                         x0 = [0, 0, 100]
