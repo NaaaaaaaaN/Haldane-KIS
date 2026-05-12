@@ -1,5 +1,33 @@
 clc; clear; close all; format compact;
-dataName = 'Yang4'; 
+
+global algae
+
+algae = dictionary( ...
+    'Anning_PcHL', "Skeletonema costatum (I_{high})", ...
+    'Anning_PcLL', "Skeletonema costatum (I_{low})", ...
+    'Yang1', "Isochrysis galbana", ...
+    'Yang2', "Dunaliella salina", ...
+    'Yang3', "Platymonus subcordiformis", ...
+    'Yang4', "Chlorococcum sp. FACHB-1556", ...
+    'Yang5', "Microcystis aeruginosa FACHB-905", ...
+    'Yang6', "Microcystis wesenbergii FACHB-1112", ...
+    'Yang7', "Scenedesmus obliquus FACHB-116", ...
+    'ct1', "Cupriavidus taiwanesis", ...
+    'ct2', "Cupriavidus taiwanesis", ...
+    'so', "Serratia odorifera"...
+);
+
+set(groot, 'defaultAxesColorOrder', ...
+    [0.0000 0.4470 0.7410;
+     0.8500 0.3250 0.0980;
+     0.9290 0.6940 0.1250;
+     0.4940 0.1840 0.5560;
+     0.4660 0.6740 0.1880;
+     0.3010 0.7450 0.9330;
+     0.6350 0.0780 0.1840]);
+
+
+dataName = 'Anning_PcHL'; 
 [option, para1, para2, para3, para4, para5] = OptSetting(dataName);
 runtest(dataName, @mu1, @dmu1, para1, option);
 runtest(dataName, @mu2, @dmu2, para2, option);
@@ -239,6 +267,7 @@ e = sqrt(sum( dmu(para, z).^2.*(sgm.^2)', 2 ));
 end
 
 function plotPIcurve(varname, funcInfo, x, y, mu, dmu, para, FIM, s)
+global algae
 % plot the prediction interval of one description
 % input:
 %	varname : string
@@ -266,35 +295,92 @@ if length(x) == 12
     sgflvl = 2.201;
 elseif length(x) == 13
     sgflvl = 2.179;
+elseif length(x) == 21
+    sgflvl = 2.086;
 elseif length(x) == 22
     sgflvl = 2.080;
+elseif length(x) == 11
+    sgflvl = 2.228;
+elseif length(x) == 6
+    sgflvl = 2.571;
 end
-figure
-plot(x, y*sh, '+', xt,  mu(para, xt)*sh, '-', ...
-    xt, ( mu(para, xt) - sgflvl*e' )*sh, '--', ...
-    xt, ( mu(para, xt) + sgflvl*e' )*sh, '--', ...
-    'LineWidth',2.5, 'MarkerSize', 10);
-xlabel('$x$ ($$\mu$$mol photons m$$^{-2} $$s$$^{-1}$$)', ...
-    'interpreter', 'latex', 'FontSize', 20); xlim([-2 1600]);
-% set ylabel for different data
-if strcmp(varname, 'Anning_PcHL')
-    ylabel('P$^C$ (h$$^{-1}$$)', 'interpreter', 'latex', 'FontSize', 20);
-else %data Yang
-    ylabel('P$_n$ ($$\mu$$mol O$_2$ mg$$^{-1} $$Chla h$$^{-1}$$)', ...
-    'interpreter', 'latex', 'FontSize', 20);
+figure; hold on;
+% 
+fill([xt, fliplr(xt)], ...
+     [( mu(para, xt) + sgflvl*e' )*sh, fliplr(( mu(para, xt) - sgflvl*e' )*sh)], ...
+     [0.8 0.8 1], ...
+     'EdgeColor','none', ...
+     'FaceAlpha',0.5);
+
+plot(x, y*sh, 'r+', xt,  mu(para, xt)*sh, 'b-', ...
+    'LineWidth', 4, 'MarkerSize', 20);
+set(gca, 'FontSize', 30);
+
+if strcmp(func2str(mu), 'mu1')
+    muchapdop = para(1) * sqrt(para(3) / (4 * para(2)));
+    Kxdop = para(3) / 4;
+    Kidop = 4 * para(2);
+    plot(xt, mu([muchapdop,Kxdop,Kidop], xt)*sh, 'g-.', 'LineWidth', 4);
+
+elseif strcmp(func2str(mu), 'mu3')
+    if para(2) == sqrt(para(1)*para(3))
+        adop = para(1)/2; 
+        bdop = 2*sqrt(para(1)*para(3)); 
+        cdop = para(3)/2;
+        plot(xt, mu([adop,bdop,cdop], xt)*sh, 'g-', 'LineWidth', 4);
+    end
+
 end
-set(gca, 'FontSize', 20);
-legend('Mesurement', 'Estimation', 'Location', 'SouthEast', 'FontSize', 25);
-set(gca, 'linewidth', 2); 
+
+if ismember(varname, {'Anning_PcHL' 'Anning_PcLL'})
+    ylabel('\mu (h^{-1})', 'FontSize', 35, 'FontWeight', 'bold');
+    xlabel('x (\mumol photons m^{-2} s^{-1})', ...
+    'FontSize', 35, 'FontWeight', 'bold'); xlim([-2 1250]);
+    if strcmp(varname, 'Anning_PcHL')
+        ylim([-0.05 0.3])
+    elseif strcmp(varname, 'Anning_PcLL')
+        ylim([-0.05 0.35])
+    end
+elseif ismember(varname, {'Yang1' 'Yang2' 'Yang3' 'Yang4' 'Yang5' 'Yang6' 'Yang7'})
+    ylabel('\mu (\mumol O_2 mg^{-1} Chla h^{-1})', 'FontSize', 35, 'FontWeight', 'bold');
+    xlabel('x (\mumol photons m^{-2} s^{-1})', ...
+    'FontSize', 35, 'FontWeight', 'bold'); xlim([-2 1250]);
+    if strcmp(varname, 'Yang1')
+        ylim([-10 200])
+    elseif strcmp(varname, 'Yang2')
+        ylim([-10 200])
+    elseif strcmp(varname, 'Yang3')
+        ylim([-10 200])
+    elseif strcmp(varname, 'Yang4')
+        ylim([-10 130])
+    elseif ismember(varname, {'Yang5' 'Yang7'})
+        ylim([-10 400])
+    elseif strcmp(varname, 'Yang6')
+        ylim([-10 300])
+    end
+else
+    ylabel('\mu (h^{-1})', 'FontSize', 35, 'FontWeight', 'bold');
+    xlabel('Concentration x (mg/L)', ...
+    'FontSize', 35, 'FontWeight', 'bold'); xlim([-2 1250]);
+    if strcmp(varname, 'ct1')
+        ylim([0 0.5])
+        xlim([0 500])
+    else
+        ylim([-0.15 0.45])
+    end
+end
+
+set(gca, 'linewidth', 1); 
 % save figure
-figname = strcat('PI_', varname, '_', funcInfo.function, '.png');
+figname = strcat('PI_', varname, '_', funcInfo.function, '.pdf');
 if isfile(['fig/' figname]) == 0
-    saveas(gca, ['fig/' figname]);
-    disp(['Figure saved as: ', figname]);
+    % exportgraphics(gca, fullfile('fig', figname), ContentType="image", BackgroundColor="white", Resolution=100);
+    % disp(['Figure saved as: ', figname]);
 end
 end
 
 function plotSensitivityCurve(varname, funcInfo, x, dmu, para, FIM, s)
+global algae
 % plot sensitivity curve of one description
 % input:
 %	varname : string
@@ -313,11 +399,17 @@ xt = 1:1:1600; %grid for illustration
 [e, sgm] = computeSensitivity(x, dmu, para, FIM, s, xt');
 v = dmu(para, xt');
 figure
-plot(xt, (sgm'.*v./e).^2, ...
-    'LineWidth',2.5, 'MarkerSize', 10);
-xlabel('$x$ ($$\mu$$mol photons m$$^{-2} $$s$$^{-1}$$)', ...
-    'interpreter', 'latex', 'FontSize', 20); xlim([0 1600]); ylim([0 1]);
-set(gca, 'FontSize', 20);
+h = plot(xt, (sgm'.*v./e).^2, ...
+    'LineWidth',4, 'MarkerSize', 10);
+styles = {'-','-.',':'};
+
+for i = 1:numel(h)
+    set(h(i), 'LineStyle', styles{mod(i-1,4)+1})
+end
+set(gca, 'FontSize', 30);
+    
+xlabel('x (\mumol photons m^{-2} s^{-1})', ...
+    'FontSize', 35, 'FontWeight', 'bold'); xlim([0 1250]); ylim([0 1]);
 % set legend for different descriptions
 if strcmp(funcInfo.function, 'mu1')
     legend({'$$ \hat{\mu}$$', '$$ K_x$$', '$$ K_i$$'}, ...
@@ -335,12 +427,13 @@ elseif strcmp(funcInfo.function, 'mu5')
     legend({'$$ \gamma_{\max}$$', '$$ x^{\star}$$'}, ...
         'Location', 'southeast', 'interpreter', 'latex', 'FontSize', 25);
 end
-set(gca, 'linewidth', 2);
+
+set(gca, 'linewidth', 1);
 % save figure
-figname = strcat('Sensitivity_', varname, '_', funcInfo.function, '.png');
+figname = strcat('Sensitivity_', varname, '_', funcInfo.function, '.pdf');
 if isfile(['fig/' figname]) == 0
-    saveas(gca, ['fig/' figname]);
-    disp(['Figure saved as: ', figname]);
+    % exportgraphics(gca, ['fig/' figname], ContentType="image", BackgroundColor="white", Resolution=100);
+    % disp(['Figure saved as: ', figname]);
 end
 end
 
@@ -371,17 +464,40 @@ function [option, para1, para2, para3, para4, para5] = OptSetting(varname)
 % input:
 %	varname : string
 %	name of the data
-option = optimset('TolFun', 1e-12, 'TolX', 1e-12, ...
-    'MaxFunEvals', 1e10, 'MaxIter', 1e8);
-if strcmp(varname, 'Yang5') %data Yang5
-    para1 = [-10, -10, -1]; para2 = [100, 10, 10];
+if ismember(varname, {'Anning_PcLL', 'Yang1', 'Yang5', 'Yang6', 'Yang7'})
+    option = optimset('TolFun', 1e-12, 'TolX', 1e-12, ...
+    'MaxFunEvals', 1e3, 'MaxIter', 1e8);
+else
+    option = optimset('TolFun', 1e-12, 'TolX', 1e-12, ...
+    'MaxFunEvals', 1e4, 'MaxIter', 1e8);
+end
+if strcmp(varname, 'Yang5')
+    para1 = [10, 1, 1]; para2 = [100, 10, 10];
     para3 = [0, -1, 1000]; para4 = [1, 1, 1];
-elseif strcmp(varname, 'Anning_PcHL') %data Anning_PcHL
-    para1 = [0, 1, 1]; para2 = [1, 1, 1]; 
+elseif strcmp(varname, 'Anning_PcHL')
+    para1 = [100, -5, 70]; para2 = [1, 1, 1]; 
     para3 = [0, 0, 1]; para4 = [0, 0, 100];
-else %data Yang1-4, Yang6-7
+elseif strcmp(varname, 'Anning_PcLL')
+    para1 = [0, 1, 1]; para2 = [0, 0, 0]; 
+    para3 = [0, 0, 1]; para4 = [0, 0, 10];
+elseif ismember(varname, {'Yang2','Yang3','Yang4'})
     para1 = [0, 1, 1]; para2 = [1, 1, 1];
     para3 = [0, 0, 0]; para4 = [0, 1, 1];
+elseif strcmp(varname, 'Yang1')
+    para1 = [160, -1, 320]; para2 = [1, 1, 1];
+    para3 = [0, 0, 0]; para4 = [0, 1, 1];
+elseif strcmp(varname, 'Yang6')
+    para1 = [10, 0, 70]; para2 = [1, 1, 1];
+    para3 = [0, 0, 0]; para4 = [0, 1, 1];
+elseif strcmp(varname, 'Yang7')
+    para1 = [250, -2.5, 550]; para2 = [1, 1, 1];
+    para3 = [0, 0, 0]; para4 = [0, 1, 1];
+elseif strcmp(varname, 'ct1')
+    para1 = [0, 0, 0]; para2 = [0, 0, 0];
+    para3 = [0, 0, 0]; para4 = [0, 0, 1];
+else
+    para1 = [10, 0, 0]; para2 = [0, 0, 0];
+    para3 = [0, 0, 0]; para4 = [1, 0, 1];
 end
 para5 = [0, 2];
 end
@@ -411,8 +527,16 @@ if strcmp(funcInfo.function, 'mu2') && abs(det(FIM)) < 1e-12
     PEMAC = NaN;
     fprintf(2, 'Fisher information matrix is singular !!\n');
 else
-    [e, ~, R] = computeSensitivity(x, dmu, ParaOpt, FIM, s, x);
+    [e, sgm, R] = computeSensitivity(x, dmu, ParaOpt, FIM, s, x);
     disp(R);
+    format long;
+    % disp(sgm);
+    if length(sgm) == 3
+        fprintf('%.2e%%\t%.2e%%\t%.2e%%\n', sgm(1)/ParaOpt(1)*100, sgm(2)/ParaOpt(2)*100, sgm(3)/ParaOpt(3)*100);
+    else
+        fprintf('%.2e%%\t%.2e%%\n', sgm(1)/ParaOpt(1)*100, sgm(2)/ParaOpt(2)*100);
+    end
+    format short;
     PEMAC = computePEMAC(x, SSE, ParaOpt, e);
     plotPIcurve(varname, funcInfo, x, y, mu, dmu, ParaOpt, FIM, s)
     plotSensitivityCurve(varname, funcInfo, x, dmu, ParaOpt, FIM, s)
