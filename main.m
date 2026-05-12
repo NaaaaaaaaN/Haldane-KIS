@@ -1,4 +1,5 @@
 clc; clear; close all; format compact;
+dataName = 'Anning_PcHL'; 
 
 global algae
 
@@ -26,8 +27,6 @@ set(groot, 'defaultAxesColorOrder', ...
      0.3010 0.7450 0.9330;
      0.6350 0.0780 0.1840]);
 
-
-dataName = 'Anning_PcHL'; 
 [option, para1, para2, para3, para4, para5] = OptSetting(dataName);
 runtest(dataName, @mu1, @dmu1, para1, option);
 runtest(dataName, @mu2, @dmu2, para2, option);
