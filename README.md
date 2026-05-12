@@ -5,7 +5,8 @@ This repository contains the data and code for the paper *Representing inhibitio
 ## Data
 
 The data is extracted from [1] and [2] for eight microalgae species. Each dataset contains two columns: one for light irradiance and one for growth rate. The data files are named as follow:
-* Anning_PcHL = *Skeletonema costatum*,
+* Anning_PcHL = *Skeletonema costatum $I_{high}$*,
+* Anning_PcLL = *Skeletonema costatum $I_{low}$*,
 * Yang1 = *Isochrysis galbana*,
 * Yang2 = *Dunaliella salina*,
 * Yang3 = *Platymonus subcordiformis*,
