@@ -1,6 +1,6 @@
 # Haldane-KIS
 
-This repository contains the data and code for the paper *Representing inhibition in growth kinetics: the Haldane KIS*, available in MATLAB.
+This repository contains the data and code for the paper *The unseen complexity of inhibition kinetics: the Haldane KIS*, available in MATLAB.
 
 ## Data
 
